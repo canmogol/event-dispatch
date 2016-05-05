@@ -1,10 +1,30 @@
 package com.fererlab.dispatch.log;
 
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Logger;
 
 public abstract class BaseLogger {
 
-    private Logger logger = Logger.getLogger(getClass().getSimpleName());
+    private Logger logger = getLogger(getClass().getSimpleName());
+
+    private Logger getLogger(String name) {
+        Logger logger = Logger.getLogger(name);
+        // do not use parent handlers
+        logger.setUseParentHandlers(false);
+        // if there are any, remove them
+        for (Handler handler : logger.getHandlers()) {
+            System.out.println("removing already registered handler: " + handler);
+            logger.removeHandler(handler);
+        }
+        // add new console handler
+        System.out.println("adding a ConsoleHandler with GamLogFormatter");
+        ConsoleHandler consoleHandler = new ConsoleHandler();
+        consoleHandler.setFormatter(new BaseLogFormatter());
+        logger.addHandler(consoleHandler);
+        return logger;
+    }
+
 
     /**
      * java logger's info call with class name, method name and thread number

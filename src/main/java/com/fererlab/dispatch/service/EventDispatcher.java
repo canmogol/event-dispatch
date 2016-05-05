@@ -1,17 +1,16 @@
 package com.fererlab.dispatch.service;
 
 import com.fererlab.dispatch.event.*;
-import com.fererlab.dispatch.log.EventDispatcherLogger;
 import com.fererlab.dispatch.util.Configuration;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EventDispatcher extends AbstractService {
 
-    private EventDispatcherLogger logger = new EventDispatcherLogger();
+    private List<EventDispatcherListener> listeners = new ArrayList<EventDispatcherListener>() {{
+        add(new LoggerEventDispatcherListener());
+    }};
     private Map<Class<? extends Event>, Set<Service>> eventServiceMap = new ConcurrentHashMap<>();
     private Set<Service> services = new HashSet<>();
     private Configuration configuration;
@@ -22,18 +21,33 @@ public class EventDispatcher extends AbstractService {
             add(EventsUnregisteredEvent.class);
         }});
         this.configuration = configuration;
+        listeners.stream().forEach(EventDispatcherListener::onCreate);
     }
 
     @Override
     public void run() {
+        discoverServices();
         registerServices();
         for (Service service : services) {
+            listeners.stream().forEach(listener -> listener.onServiceStart(service.getClass().getName()));
             new Thread(service).start();
         }
         super.run();
     }
 
+    private void discoverServices() {
+        // TODO discover services from command line parameters, classpath etc.
+        // notify listener if there might be en error while discovering services
+        // listeners.stream().forEach(listener -> listener.onServiceDiscoveryError(""));
+    }
+
     private Set<Service> registerServices() {
+        // collect service names for logging
+        StringBuilder serviceNames = new StringBuilder().append("[");
+        configuration.getServices().stream().forEach(aClass -> serviceNames.append(aClass.getName()).append(","));
+        // call listener
+        listeners.stream().forEach(listener -> listener.onServiceRegister(serviceNames.append("]").toString()));
+        // initialize services and set properties and broadcast service
         for (Class<? extends Service> sClass : configuration.getServices()) {
             try {
                 Service service = sClass.newInstance();
@@ -51,7 +65,7 @@ public class EventDispatcher extends AbstractService {
                 }
                 services.add(service);
             } catch (InstantiationException | IllegalAccessException e) {
-                logger.couldNotCreateService(sClass.toString(), e.getMessage());
+                listeners.stream().forEach(listener -> listener.onCreationError(sClass.toString(), e.getMessage()));
             }
         }
         return services;
@@ -64,12 +78,16 @@ public class EventDispatcher extends AbstractService {
                 try {
                     service.notify(event);
                 } catch (Throwable pikachu) {
-                    logger.couldNotNotifyService(service.toString(), pikachu.getMessage());
+                    listeners.stream().forEach(listener -> listener.onNotificationError(service.toString(), pikachu.getMessage()));
                 }
             }
         } else {
-            logger.noEventHandler(event.toString());
+            listeners.stream().forEach(listener -> listener.noEventHandlerFound(event.toString()));
         }
+    }
+
+    public void addListener(EventDispatcherListener listener) {
+        listeners.add(listener);
     }
 
     public void handleEvent(ShutdownImmediatelyEvent event) {
@@ -83,6 +101,8 @@ public class EventDispatcher extends AbstractService {
 
     @Override
     public void handleEvent(ShutdownEvent event) {
+        // notify listeners
+        listeners.stream().forEach(EventDispatcherListener::onServiceShutdown);
         // first shutdown other services
         handleEvent((BaseEvent) event);
         // then shutdown event dispatcher
@@ -110,4 +130,5 @@ public class EventDispatcher extends AbstractService {
             }
         });
     }
+
 }

@@ -2,8 +2,8 @@ package com.fererlab.dispatch.log;
 
 public class EventDispatcherLogger extends BaseLogger {
 
-    public void couldNotDiscoverServices(String message) {
-        log("Could not discover services, exception message: " + message);
+    public void couldNotDiscoverServices(String errorMessage) {
+        error("Could not create services, exception: " + errorMessage);
     }
 
     public void couldNotCreateService(String serviceName, String errorMessage) {
@@ -18,4 +18,19 @@ public class EventDispatcherLogger extends BaseLogger {
         error("!!! THERE IS NO REGISTERED SERVICE FOR THIS EVENT: " + event);
     }
 
+    public void eventDispatcherCreated() {
+        log("Event dispatcher created");
+    }
+
+    public void willRegisterServices(String serviceNames) {
+        log("will register these services: " + serviceNames);
+    }
+
+    public void serviceStarted(String serviceName) {
+        log(serviceName + "service started");
+    }
+
+    public void serviceShutdown() {
+        log("Shutdown event fired, will notify registered services");
+    }
 }

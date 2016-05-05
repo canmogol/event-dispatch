@@ -1,23 +1,6 @@
 package com.fererlab.dispatch.log;
 
-import java.util.logging.Logger;
-
-public class AbstractServiceLogger {
-
-    private final String serviceName;
-    private Logger L = Logger.getLogger(getClass().getSimpleName());
-
-    public AbstractServiceLogger(String serviceName) {
-        this.serviceName = serviceName;
-    }
-
-    private void log(String log) {
-        L.info("[" + Thread.currentThread().getId() + "] [" + serviceName + "] " + log);
-    }
-
-    private void error(String log) {
-        L.severe("[" + Thread.currentThread().getId() + "] [" + serviceName + "] " + log);
-    }
+public class AbstractServiceLogger extends BaseLogger {
 
     public void genericEventFired(String baseEvent) {
         log("Generic Event, will do nothing, baseEvent: " + baseEvent);
@@ -35,11 +18,11 @@ public class AbstractServiceLogger {
         error("service interrupted, exception: " + errorMessage);
     }
 
-    public void serviceIsShutdown() {
-        log("shutdown");
+    public void serviceIsShutdown(String serviceName) {
+        log(serviceName + " service shutdown");
     }
 
-    public void shutdownServiceEvent(String event) {
-        log("Shutdown Event, will shutdown this service, event: " + event);
+    public void shutdownServiceEvent(String serviceName, String event) {
+        log("Shutdown Event, will shutdown " + serviceName + " service, event: " + event);
     }
 }
