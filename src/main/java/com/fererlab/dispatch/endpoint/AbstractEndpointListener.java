@@ -10,7 +10,7 @@ import java.util.Map;
 
 public abstract class AbstractEndpointListener implements EndpointListener {
 
-    private AbstractEndpointLogger logger = new AbstractEndpointLogger();
+    private AbstractEndpointLogger logger = new AbstractEndpointLogger(getClass());
 
     private Map<String, EndpointObserver<Event>> map = new HashMap<>();
     private Service service;

@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
-public class BaseLogFormatter extends SimpleFormatter {
+public class DispatcherLogFormatter extends SimpleFormatter {
 
     @Override
     public synchronized String format(LogRecord record) {

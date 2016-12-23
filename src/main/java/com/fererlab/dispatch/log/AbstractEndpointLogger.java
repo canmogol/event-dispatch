@@ -1,6 +1,10 @@
 package com.fererlab.dispatch.log;
 
-public class AbstractEndpointLogger extends BaseLogger {
+public class AbstractEndpointLogger extends DefaultLogging {
+
+    public AbstractEndpointLogger(Class<?> owner) {
+        super(owner);
+    }
 
     public void noObserverFoundForEvent(String event) {
         error("there is no observer for this event: " + event);

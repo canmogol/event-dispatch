@@ -1,6 +1,10 @@
 package com.fererlab.dispatch.log;
 
-public class EventDispatcherLogger extends BaseLogger {
+public class EventDispatcherLogger extends DefaultLogging {
+
+    public EventDispatcherLogger(Class<?> owner) {
+        super(owner);
+    }
 
     public void couldNotDiscoverServices(String errorMessage) {
         error("Could not create services, exception: " + errorMessage);

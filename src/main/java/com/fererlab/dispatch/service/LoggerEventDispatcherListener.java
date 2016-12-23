@@ -4,7 +4,7 @@ import com.fererlab.dispatch.log.EventDispatcherLogger;
 
 public class LoggerEventDispatcherListener implements EventDispatcherListener {
 
-    private EventDispatcherLogger logger = new EventDispatcherLogger();
+    private EventDispatcherLogger logger = new EventDispatcherLogger(getClass());
 
     @Override
     public void onCreate() {

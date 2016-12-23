@@ -18,7 +18,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public abstract class AbstractService implements Service {
 
     private static Method handleMethod = null;
-    private AbstractServiceLogger logger = new AbstractServiceLogger();
+    private AbstractServiceLogger logger = new AbstractServiceLogger(getClass());
     private Set<Class<? extends Event>> eventsToListen = new HashSet<Class<? extends Event>>() {{
         add(ShutdownEvent.class);
     }};
@@ -129,7 +129,7 @@ public abstract class AbstractService implements Service {
                 break;
             }
         }
-        logger.serviceIsShutdown(getClass().getSimpleName());
+        logger.serviceIsDown(getClass().getSimpleName());
     }
 
     public void handleEvent(ShutdownEvent event) {
